@@ -72,6 +72,8 @@ jobs:
       - name: Run tests
         env:
           RAILS_ENV: test
-          DATABASE_URL: postgres://postgres:postgres@localhost:5432
-          # REDIS_URL: redis://localhost:6379/0
-        run: bin/rails db:test:prepare test
+          SHORT_LINK_DATABASE_HOST: db
+          SHORT_LINK_DATABASE_PORT: 5432
+          SHORT_LINK_DATABASE_USERNAME: postgres
+          SHORT_LINK_DATABASE_PASSWORD: password
+        run: bundle exec rspec
