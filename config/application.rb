@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative "boot"
 
 require "rails"
@@ -28,17 +30,12 @@ module ShortLink
     # Common ones are `templates`, `generators`, or `middleware`, for example.
     config.autoload_lib(ignore: %w[assets tasks])
 
-    # Configuration for the application, engines, and railties goes here.
-    #
-    # These settings can be overridden in specific environments using the files
-    # in config/environments, which are processed later.
-    #
-    # config.time_zone = "Central Time (US & Canada)"
-    # config.eager_load_paths << Rails.root.join("extras")
+    config.x = config_for(:x)
 
-    # Only loads a smaller set of middleware suitable for API only apps.
-    # Middleware like session, flash, cookies can be added back manually.
-    # Skip views, helpers and assets when generating a new resource.
     config.api_only = true
+    config.cache_store = :redis_cache_store, {
+      url: URI.join(ENV.fetch("SHORT_LINK_REDIS_URL"), config.x.redis[:cache_db])
+    }
+    Rails.application.routes.default_url_options[:host] = ENV.fetch("SHORT_LINK_HOST", "localhost:3000")
   end
 end

@@ -1,0 +1,35 @@
+Bundler/OrderedGems:
+  Enabled: true
+Style/FrozenStringLiteralComment:
+  Enabled: true
+  Exclude:
+    - "lib/base62.rb"
+Layout/IndentationConsistency:
+  Enabled: true
+Layout/IndentationWidth:
+  Enabled: true
+  Width: 2
+RSpec/EmptyLineAfterSubject:
+  Enabled: true
+RSpec/EmptyLineAfterFinalLet:
+  Enabled: true
+RSpec/EmptyLineAfterHook:
+  Enabled: true
+Layout/EmptyLines:
+  Enabled: true
+Style/StringLiterals:
+  Enabled: true
+  EnforcedStyle: double_quotes
+  Include:
+    - "app/**/*"
+    - "spec/**/*"
+    - "config/**/*"
+    - "lib/**/*"
+    - "test/**/*"
+    - "Gemfile"
+
+Style/HashSyntax:
+  EnforcedShorthandSyntax: always
+Style/WordArray:
+  Enabled: true
+  MinSize: 2

@@ -1,0 +1,14 @@
+default: &default
+  redis:
+    cache_db: "1"
+
+development:
+  <<: *default
+
+test:
+  <<: *default
+  redis:
+    cache_db: "100"
+
+production:
+  <<: *default
