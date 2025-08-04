@@ -50,11 +50,11 @@ jobs:
           - 5432:5432
         options: --health-cmd="pg_isready" --health-interval=10s --health-timeout=5s --health-retries=3
 
-      # redis:
-      #   image: redis
-      #   ports:
-      #     - 6379:6379
-      #   options: --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5
+      redis:
+        image: redis
+        ports:
+          - 6379:6379
+        options: --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5
 
     steps:
       - name: Install packages
@@ -76,4 +76,5 @@ jobs:
           SHORT_LINK_DATABASE_PORT: 5432
           SHORT_LINK_DATABASE_USERNAME: postgres
           SHORT_LINK_DATABASE_PASSWORD: password
+          SHORT_LINK_REDIS_URL: redis://localhost:6379
         run: bundle exec rspec
