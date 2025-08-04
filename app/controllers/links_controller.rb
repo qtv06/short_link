@@ -3,6 +3,8 @@
 class LinksController < ApplicationController
   before_action :set_link, only: %i[decode show]
 
+  rate_limit to: 20, within: 5.minutes, only: :encode
+
   def encode
     link = Link.create_shortened_for(params[:original_url])
     render json: link, serializer: LinkSerializer, root: :data, status: :created

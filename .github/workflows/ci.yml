@@ -56,6 +56,13 @@ jobs:
           - 6379:6379
         options: --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5
 
+    env:
+      RAILS_ENV: test
+      SHORT_LINK_DATABASE_HOST: localhost
+      SHORT_LINK_DATABASE_PORT: 5432
+      SHORT_LINK_DATABASE_USERNAME: postgres
+      SHORT_LINK_DATABASE_PASSWORD: password
+      SHORT_LINK_REDIS_URL: redis://localhost:6379
     steps:
       - name: Install packages
         run: sudo apt-get update && sudo apt-get install --no-install-recommends -y build-essential git libpq-dev libyaml-dev pkg-config
@@ -71,11 +78,4 @@ jobs:
       - name: Set up Rails app
         run: bin/setup --skip-server
       - name: Run tests
-        env:
-          RAILS_ENV: test
-          SHORT_LINK_DATABASE_HOST: localhost
-          SHORT_LINK_DATABASE_PORT: 5432
-          SHORT_LINK_DATABASE_USERNAME: postgres
-          SHORT_LINK_DATABASE_PASSWORD: password
-          SHORT_LINK_REDIS_URL: redis://localhost:6379
         run: bundle exec rspec

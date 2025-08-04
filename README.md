@@ -8,7 +8,8 @@ This project implements a URL shortening service similar to bit.ly or tinyurl.co
 
 ### Key Features
 
-- **Counter-based short code generation** for guaranteed uniqueness
+- **Counter-based short code generation** for guaranteed uniqueness and avoid collisions
+- **Rate limiting** to prevent abuse (20 requests per 5 minutes)
 - **Redis caching** for high-performance lookups
 - **Base62 encoding** with randomized character set for security
 - **PostgreSQL** for persistent storage
@@ -67,17 +68,57 @@ The application will be available at `http://localhost:3000`
 
 The service uses a **counter-based approach** with caching for generating short URLs. This architecture provides several advantages over hash-based solutions.
 
+### Encoding Flow (Create Short Link)
+
+```
+┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
+│POST /encode │───▶│Rate Limiting│───▶│  Rails App  │───▶│Redis Counter│───▶│Base62 Encode│
+└─────────────┘    │20 req/5min  │    └─────────────┘    │(starts: 1B) │    │(Random Set) │
+                   └─────────────┘                       └─────────────┘    └─────────────┘
+                          │                                                         │
+                          ▼                                                         ▼
+                   ┌─────────────┐                                         ┌─────────────┐
+                   │ 429 Error   │                                         │ PostgreSQL  │
+                   └─────────────┘                                         │Store Mapping│
+                                                                           └─────────────┘
+                                                                                  │
+                                                                                  ▼
+┌─────────────┐                                                            ┌─────────────┐
+│Return JSON  │◀────────────-------────────────────────────────────────────│ Redis Cache │
+│201 Created  │                                                            │             │
+└─────────────┘                                                            └─────────────┘
+```
+
+### Decoding Flow (Resolve Short Link)
+
 ```
 ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
-│   Client    │───▶│    Rails    │───▶│ PostgreSQL  │
-└─────────────┘    │ Application │    │  Database   │
-                   └─────────────┘    └─────────────┘
-                          │
-                          ▼
-                   ┌─────────────┐
-                   │    Redis    │
-                   │   Cache     │
-                   └─────────────┘
+│GET /short_  │───▶│  Rails App  │───▶│Redis Cache  │
+│    code     │    │             │    │Check First  │
+└─────────────┘    └─────────────┘    └─────────────┘
+                                             │
+                                    ┌────────┴────────┐
+                                    ▼                 ▼
+                            ┌─────────────┐   ┌─────────────┐
+                            │ Cache HIT   │   │ Cache MISS  │
+                            │(Fast Path)  │   │             │
+                            └─────────────┘   └─────────────┘
+                                    │                 │
+                                    │                 ▼
+                                    │         ┌─────────────┐    ┌─────────────┐
+                                    │         │ PostgreSQL  │───▶│Update Cache │
+                                    │         │  Database   │    │(12h TTL)    │
+                                    │         │  Query      │    └─────────────┘
+                                    │         └─────────────┘            │
+                                    │                 │                  │
+                                    └─────────────────┴──────────────────┘
+                                                      │
+                                                      ▼
+                                             ┌─────────────┐
+                                             │301 Redirect │
+                                             │to Original  │
+                                             │    URL      │
+                                             └─────────────┘
 ```
 
 ### Counter + Cache Strategy
@@ -110,7 +151,6 @@ The service uses a **counter-based approach** with caching for generating short 
 #### Performance Optimizations
 
 1. **Redis Caching**:
-   - Cache hit ratio of ~90% for popular links
    - 12-hour expiration balances memory usage and performance
    - Sub-millisecond lookup times
 
@@ -118,9 +158,7 @@ The service uses a **counter-based approach** with caching for generating short 
    - Redis increment operations are atomic and fast
    - No database queries needed for counter generation
 
-3. **Connection Pooling**:
-   - PostgreSQL connection pool configured for concurrent requests
-   - Optimized for read-heavy workloads
+3. **Rate Limiting**: The application implements rate limiting to prevent abuse of the encoding endpoint.
 
 ### Comparison with Hash-based Solutions
 
@@ -238,16 +276,44 @@ curl http://localhost:3000/decode?short_code=RO9zDG
 curl -L http://localhost:3000/RO9zDG
 ```
 
+## Future Enhancements
+
+### Security & Authentication
+- [ ] **API Authentication** - JWT tokens or API keys for protected endpoints
+- [ ] **User Management** - User accounts and link ownership
+- [ ] **HTTPS Enforcement** - SSL/TLS configuration for production
+
+### Performance & Scalability
+- [ ] **Database Connection Pooling** - Optimize database connections
+- [ ] **Redis Clustering** - Multi-node Redis setup for high availability
+- [ ] **CDN Integration** - Content delivery network for global performance
+- [ ] **Horizontal Scaling** - Load balancer and multiple app instances
+- [ ] **Caching Strategies** - Advanced caching layers (HTTP caching, edge caching)
+
+### Monitoring & Observability
+- [ ] **Application Metrics** - Prometheus/Grafana integration
+- [ ] **Logging Infrastructure** - Structured logging with ELK stack
+- [ ] **Health Checks** - Comprehensive system health monitoring
+- [ ] **Alert System** - Automated alerts for system issues
+- [ ] **Performance Monitoring** - APM tools integration
+
+### Features & UX
+- [ ] **Analytics Dashboard** - Click tracking and usage statistics
+- [ ] **Custom Short Codes** - Allow users to specify custom short URLs
+- [ ] **Bulk Operations** - Batch URL creation and management
+- [ ] **Link Expiration** - Time-based link expiration
+- [ ] **QR Code Generation** - Auto-generate QR codes for short links
+
 ## Development
 
 ### Running Tests
 
 ```bash
 # Run all tests
-docker-compose exec app rails test
+docker-compose exec app bundle exec rspec
 
 # Run specific test file
-docker-compose exec app rails test test/models/link_test.rb
+docker-compose exec app bundle exec rspec test/models/link_test.rb
 ```
 
 ### Database Operations

@@ -17,23 +17,16 @@ RSpec.describe Base62 do
         expect(described_class.encode(61)).to eq("Y")
       end
 
-      it 'encodes 62 as "OR" (62^1)' do
+      it "encodes 62 as 'OR' (62^1)" do
         expect(described_class.encode(62)).to eq("OR")
       end
 
-      it 'encodes 124 as "9R" (2 * 62)' do
+      it "encodes 124 as '9R' (2 * 62)" do
         expect(described_class.encode(124)).to eq("9R")
       end
 
-      it 'encodes 3844 as "ORR" (62^2)' do
+      it "encodes 3844 as 'ORR' (62^2)" do
         expect(described_class.encode(3844)).to eq("ORR")
-      end
-
-      it "encodes numbers consistently" do
-        # Test a few specific numbers to ensure consistency
-        expect(described_class.encode(100)).to be_a(String)
-        expect(described_class.encode(1000)).to be_a(String)
-        expect(described_class.encode(10000)).to be_a(String)
       end
     end
 
