@@ -68,7 +68,8 @@ jobs:
         with:
           ruby-version: .ruby-version
           bundler-cache: true
-
+      - name: Set up Rails app
+        run: bin/setup --skip-server
       - name: Run tests
         env:
           RAILS_ENV: test

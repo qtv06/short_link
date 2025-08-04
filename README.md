@@ -26,21 +26,12 @@ This project implements a URL shortening service similar to bit.ly or tinyurl.co
 Create a `.env` file in the project root with the following variables:
 
 ```env
-# Database Configuration
 SHORT_LINK_DATABASE_HOST=db
 SHORT_LINK_DATABASE_PORT=5432
 SHORT_LINK_DATABASE_USERNAME=postgres
 SHORT_LINK_DATABASE_PASSWORD=password
-
-# Rails Configuration
-RAILS_ENV=development
-RAILS_MAX_THREADS=5
-
-# Redis Configuration
-REDIS_URL=redis://redis:6379/0
-
-# Application Configuration
-RAILS_MASTER_KEY=your_master_key_here
+SHORT_LINK_REDIS_URL=redis://redis:6379
+SHORT_LINK_HOST=localhost:3000
 ```
 
 ### Running the Application
