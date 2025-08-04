@@ -72,7 +72,7 @@ jobs:
       - name: Run tests
         env:
           RAILS_ENV: test
-          SHORT_LINK_DATABASE_HOST: db
+          SHORT_LINK_DATABASE_HOST: localhost
           SHORT_LINK_DATABASE_PORT: 5432
           SHORT_LINK_DATABASE_USERNAME: postgres
           SHORT_LINK_DATABASE_PASSWORD: password
