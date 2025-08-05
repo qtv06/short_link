@@ -3,6 +3,7 @@
 class Link < ApplicationRecord
   # Initial value for the URL counter, starting from 1 billion will make the short url more readable
   INITIAL_URL_COUNTER = 1_000_000_000
+  URL_COUNTER_KEY = "url_counter"
 
   validates :original_url, presence: true
   validates :original_url, format: { with: URI::DEFAULT_PARSER.make_regexp(%w[http https]), message: "must be a valid URL" }, allow_blank: true
@@ -24,11 +25,11 @@ class Link < ApplicationRecord
     end
 
     def increment_url_counter
-      Rails.cache.increment("url_counter")
+      Rails.cache.increment(URL_COUNTER_KEY)
     end
 
     def initialize_url_counter
-      Rails.cache.write("url_counter", INITIAL_URL_COUNTER, raw: true) unless Rails.cache.exist?("url_counter")
+      Rails.cache.write(URL_COUNTER_KEY, INITIAL_URL_COUNTER, raw: true) unless Rails.cache.exist?(URL_COUNTER_KEY)
     end
   end
 

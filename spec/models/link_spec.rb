@@ -111,10 +111,10 @@ RSpec.describe Link, type: :model do
     end
 
     it "increments the URL counter" do
-      initial_counter = Rails.cache.read("url_counter", raw: true).to_i
+      initial_counter = Rails.cache.read(described_class::URL_COUNTER_KEY, raw: true).to_i
       described_class.create_shortened_for(original_url)
 
-      expect(Rails.cache.read("url_counter", raw: true).to_i).to eq(initial_counter + 1)
+      expect(Rails.cache.read(described_class::URL_COUNTER_KEY, raw: true).to_i).to eq(initial_counter + 1)
     end
 
     it "uses Base62 encoding for the short code" do
@@ -155,11 +155,11 @@ RSpec.describe Link, type: :model do
     end
 
     it "increments the counter in cache" do
-      initial_value = Rails.cache.read("url_counter", raw: true).to_i
+      initial_value = Rails.cache.read(described_class::URL_COUNTER_KEY, raw: true).to_i
       result = described_class.increment_url_counter
 
       expect(result).to eq(initial_value + 1)
-      expect(Rails.cache.read("url_counter", raw: true).to_i).to eq(initial_value + 1)
+      expect(Rails.cache.read(described_class::URL_COUNTER_KEY, raw: true).to_i).to eq(initial_value + 1)
     end
 
     it "returns the incremented value" do
@@ -173,11 +173,11 @@ RSpec.describe Link, type: :model do
     before { Rails.cache.clear }
 
     it "sets the initial counter value when cache is empty" do
-      expect(Rails.cache.exist?("url_counter")).to be false
+      expect(Rails.cache.exist?(described_class::URL_COUNTER_KEY)).to be false
 
       described_class.initialize_url_counter
 
-      expect(Rails.cache.read("url_counter", raw: true).to_i).to eq(described_class::INITIAL_URL_COUNTER)
+      expect(Rails.cache.read(described_class::URL_COUNTER_KEY, raw: true).to_i).to eq(described_class::INITIAL_URL_COUNTER)
     end
   end
 

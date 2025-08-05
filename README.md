@@ -75,18 +75,18 @@ The service uses a **counter-based approach** with caching for generating short 
 │POST /encode │───▶│Rate Limiting│───▶│  Rails App  │───▶│Redis Counter│───▶│Base62 Encode│
 └─────────────┘    │20 req/5min  │    └─────────────┘    │(starts: 1B) │    │(Random Set) │
                    └─────────────┘                       └─────────────┘    └─────────────┘
-                          │                                                         │
-                          ▼                                                         ▼
-                   ┌─────────────┐                                         ┌─────────────┐
-                   │ 429 Error   │                                         │ PostgreSQL  │
-                   └─────────────┘                                         │Store Mapping│
-                                                                           └─────────────┘
-                                                                                  │
-                                                                                  ▼
-┌─────────────┐                                                            ┌─────────────┐
-│Return JSON  │◀────────────-------────────────────────────────────────────│ Redis Cache │
-│201 Created  │                                                            │             │
-└─────────────┘                                                            └─────────────┘
+                          │                                                        │
+                          ▼                                                        ▼
+                   ┌─────────────┐                                          ┌─────────────┐
+                   │ 429 Error   │                                          │ PostgreSQL  │
+                   └─────────────┘                                          │Store Mapping│
+                                                                            └─────────────┘
+                                                                                   │
+                                                                                   ▼
+┌─────────────┐                                                             ┌─────────────┐
+│Return JSON  │◀────────────-------─────────────────────────────────────────│ Redis Cache │
+│201 Created  │                                                             │             │
+└─────────────┘                                                             └─────────────┘
 ```
 
 ### Decoding Flow (Resolve Short Link)
@@ -295,7 +295,6 @@ curl -L http://localhost:3000/RO9zDG
 - [ ] **Logging Infrastructure** - Structured logging with ELK stack
 - [ ] **Health Checks** - Comprehensive system health monitoring
 - [ ] **Alert System** - Automated alerts for system issues
-- [ ] **Performance Monitoring** - APM tools integration
 
 ### Features & UX
 - [ ] **Analytics Dashboard** - Click tracking and usage statistics

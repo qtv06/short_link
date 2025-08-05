@@ -7,6 +7,29 @@ RSpec.describe "Links", type: :request do
     Link.initialize_url_counter
   end
 
+  shared_examples "caches link data for subsequent requests" do |http_status_code|
+    let!(:link) { Link.create_shortened_for("https://www.example.com") }
+    let(:short_code) { link.short_code }
+
+    it "caches link data for 12 hours" do
+      expect(Rails.cache).to receive(:fetch)
+        .with("link:#{link.short_code}", expires_in: 12.hours)
+        .and_call_original
+
+      subject
+    end
+
+    it "serves subsequent requests from cache" do
+      Rails.cache.write("link:#{link.short_code}", link, expires_in: 12.hours)
+
+      expect(Link).not_to receive(:find_by_short_code!)
+
+      subject
+
+      expect(response).to have_http_status(http_status_code)
+    end
+  end
+
   describe "POST /encode" do
     subject { post "/encode", params: { original_url: url } }
 
@@ -95,15 +118,7 @@ RSpec.describe "Links", type: :request do
         expect(json_response["data"]["short_code"]).to eq(link.short_code)
       end
 
-      it "caches the link data" do
-        # First request should cache the link
-        subject
-
-        # Verify the link is cached
-        cached_link = Rails.cache.read("link:#{link.short_code}")
-        expect(cached_link).to be_present
-        expect(cached_link.id).to eq(link.id)
-      end
+      it_behaves_like "caches link data for subsequent requests", :ok
     end
 
     context "with invalid short code" do
@@ -127,7 +142,7 @@ RSpec.describe "Links", type: :request do
     end
   end
 
-  describe "GET /:short_code (show action)" do
+  describe "GET /:short_code" do
     subject { get "/#{short_code}" }
 
     let!(:link) { Link.create_shortened_for("https://www.example.com") }
@@ -150,17 +165,7 @@ RSpec.describe "Links", type: :request do
         expect(response).to redirect_to("https://www.external-site.com")
       end
 
-      it "uses cached link data" do
-        # Pre-cache the link
-        Rails.cache.write("link:#{link.short_code}", link, expires_in: 12.hours)
-
-        # Mock the database call to ensure cache is used
-        expect(Link).not_to receive(:find_by_short_code!)
-
-        subject
-
-        expect(response).to have_http_status(:moved_permanently)
-      end
+      it_behaves_like "caches link data for subsequent requests", :moved_permanently
     end
 
     context "with invalid short code" do
@@ -171,31 +176,6 @@ RSpec.describe "Links", type: :request do
 
         expect(response).to have_http_status(:not_found)
       end
-    end
-  end
-
-  describe "caching behavior" do
-    let!(:link) { Link.create_shortened_for("https://www.example.com") }
-
-    it "caches link data for 12 hours" do
-      expect(Rails.cache).to receive(:fetch)
-        .with("link:#{link.short_code}", expires_in: 12.hours)
-        .and_call_original
-
-      get "/decode", params: { short_code: link.short_code }
-    end
-
-    it "serves subsequent requests from cache" do
-      # First request - should hit database and cache
-      get "/decode", params: { short_code: link.short_code }
-
-      # Mock the Link model to ensure it's not called again
-      expect(Link).not_to receive(:find_by_short_code!)
-
-      # Second request - should use cache
-      get "/decode", params: { short_code: link.short_code }
-
-      expect(response).to have_http_status(:ok)
     end
   end
 end
