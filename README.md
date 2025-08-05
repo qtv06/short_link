@@ -167,7 +167,7 @@ The service uses a **counter-based approach** with caching for generating short 
 | **Uniqueness** | ✅ Guaranteed by atomic counter | ❌ Collision possible, needs handling |
 | **Performance** | ✅ O(1) generation, cached lookups | ❌ Hash computation overhead |
 | **URL Length** | ✅ Short, predictable length (6 chars) | ❌ Fixed length, often longer |
-| **Security** | ✅ Randomized encoding | ❌ Predictable patterns |
+| **Security** | ❌ Predictable patterns | ✅ Unpredictable patterns |
 | **Scalability** | ✅ Horizontal scaling with Redis | ❌ CPU-intensive hashing |
 | **Storage** | ✅ Minimal database queries | ❌ Collision resolution complexity |
 
