@@ -18,6 +18,8 @@ class LinksController < ApplicationController
     redirect_to @link.original_url, status: :moved_permanently, allow_other_host: true
   end
 
+  def welcome; end
+
   private
 
     def set_link
