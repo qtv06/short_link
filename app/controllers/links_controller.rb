@@ -20,6 +20,8 @@ class LinksController < ApplicationController
 
   def welcome; end
 
+  def hello; end
+
   private
 
     def set_link
