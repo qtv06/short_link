@@ -8,7 +8,7 @@ gem "dotenv"
 gem "kamal", require: false
 gem "pg", "~> 1.1"
 gem "puma", ">= 5.0"
-gem "rails", "~> 8.0.2"
+gem "rails", "~> 8.0.3"
 gem "redis"
 gem "tzinfo-data", platforms: %i[ windows jruby ]
 
